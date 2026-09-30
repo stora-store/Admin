@@ -6,8 +6,8 @@
   <title>لوحة تحكم ستورا ستور | Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   
+  <!-- مكتبات فايربيس السحابية النسخة المستقرة -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
   <style>
@@ -24,7 +24,7 @@
       --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 20px; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px; display: none; }
 
     .admin-container {
       background: #ffffff; max-width: 1000px; margin: 0 auto; border-radius: 16px; padding: 25px;
@@ -48,46 +48,14 @@
     .form-group label { display: block; font-weight: 800; font-size: 0.85rem; margin-bottom: 4px; color: var(--primary); }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-family: 'Cairo'; font-size: 0.9rem; outline: none; }
     .admin-submit-btn { background: #059669; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: 900; cursor: pointer; margin-top: 10px; }
-
-    .dual-lang-box { background: #f8fafc; border: 1px dashed var(--border); padding: 12px; border-radius: 10px; margin-bottom: 12px; }
-    .dual-lang-box h5 { font-size: 0.85rem; font-weight: 900; color: var(--gold-dark); margin-bottom: 8px; }
-
-    #authOverlay {
-      position: fixed; inset: 0; background: rgba(17, 24, 39, 0.9); z-index: 9999;
-      display: flex; align-items: center; justify-content: center; padding: 20px;
-    }
-    .auth-card {
-      background: #fff; width: 100%; max-width: 420px; border-radius: 16px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); text-align: center;
-    }
   </style>
 </head>
 <body>
 
-  <div id="authOverlay">
-    <div class="auth-card">
-      <h2 style="font-size: 1.3rem; font-weight: 900; color: var(--primary); margin-bottom: 8px;">🔐 بوابة إدارة Stora Store</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">يرجى تسجيل الدخول بحساب الأدمن المعتمد</p>
-      
-      <div class="form-group" style="text-align: right;">
-        <label>البريد الإلكتروني:</label>
-        <input type="email" id="authEmail" placeholder="admin@storastore.com">
-      </div>
-      <div class="form-group" style="text-align: right;">
-        <label>كلمة المرور:</label>
-        <input type="password" id="authPassword" placeholder="••••••••">
-      </div>
-      <button class="admin-submit-btn" onclick="loginWithFirebase()" style="background: var(--primary); margin-top: 5px;">تسجيل الدخول الآمن</button>
-    </div>
-  </div>
-
   <div class="admin-container">
     <div class="admin-header">
       <h3>⚙ لوحة التحكم والإدارة المستقلة (Admin Dashboard)</h3>
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <span id="loggedInUserEmail" style="font-size: 0.8rem; font-weight: 800; color: #059669;"></span>
-        <button onclick="logoutFirebase()" style="background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; cursor: pointer;">🚪 خروج</button>
-        <a href="index.html" class="back-store-btn">🏠 العودة للمتجر</a>
-      </div>
+      <a href="index.html" class="back-store-btn">🏠 العودة للمتجر</a>
     </div>
 
     <div class="admin-body-grid">
@@ -96,7 +64,7 @@
         <button class="admin-tab-btn" onclick="switchAdminTab(1, this)">📄 السياسات والخدمات</button>
         <button class="admin-tab-btn" onclick="switchAdminTab(2, this)">📢 الشريط الإعلاني الأحمر</button>
         <button class="admin-tab-btn" onclick="switchAdminTab(3, this)">⚡ الأسعار والخصومات</button>
-        <button class="admin-tab-btn" onclick="switchAdminTab(4, this)">🔐 الحساب</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab(4, this)">🔐 كلمة المرور</button>
         <button class="admin-tab-btn" onclick="switchAdminTab(5, this)">📦 إدارة المنتجات</button>
       </div>
 
@@ -126,36 +94,16 @@
 
         <!-- Tab 1: السياسات والخدمات -->
         <div class="admin-tab-content-area">
-          <h4 style="font-size:0.95rem; font-weight:900; margin-bottom:10px;">📄 تعديل نصوص خدمة العملاء والسياسات (عربي / إنجليزي)</h4>
-          <div class="dual-lang-box">
-            <h5>من نحن؟ (About Us)</h5>
-            <div class="form-group"><label>العربية:</label><textarea id="adminAboutAr" rows="2" required></textarea></div>
-            <div class="form-group"><label>English:</label><textarea id="adminAboutEn" rows="2" required dir="ltr"></textarea></div>
-          </div>
-          <div class="dual-lang-box">
-            <h5>لماذا ستورا ستور؟ (Why Us)</h5>
-            <div class="form-group"><label>العربية:</label><textarea id="adminWhyAr" rows="2" required></textarea></div>
-            <div class="form-group"><label>English:</label><textarea id="adminWhyEn" rows="2" required dir="ltr"></textarea></div>
-          </div>
-          <div class="dual-lang-box">
-            <h5>الشروط والأحكام (Terms & Conditions)</h5>
-            <div class="form-group"><label>العربية:</label><textarea id="adminTermsAr" rows="2" required></textarea></div>
-            <div class="form-group"><label>English:</label><textarea id="adminTermsEn" rows="2" required dir="ltr"></textarea></div>
-          </div>
-          <div class="dual-lang-box">
-            <h5>سياسة الشحن (Shipping Policy)</h5>
-            <div class="form-group"><label>العربية:</label><textarea id="adminShippingAr" rows="2" required></textarea></div>
-            <div class="form-group"><label>English:</label><textarea id="adminShippingEn" rows="2" required dir="ltr"></textarea></div>
-          </div>
-          <div class="dual-lang-box">
-            <h5>سياسة الاستبدال والاسترجاع (Return Policy)</h5>
-            <div class="form-group"><label>العربية:</label><textarea id="adminReturnAr" rows="2" required></textarea></div>
-            <div class="form-group"><label>English:</label><textarea id="adminReturnEn" rows="2" required dir="ltr"></textarea></div>
-          </div>
-          <button class="admin-submit-btn" onclick="savePoliciesSettings()">💾 حفظ السياسات والنصوص باللغتين</button>
+          <h4 style="font-size:0.95rem; font-weight:900; margin-bottom:10px;">📄 تعديل نصوص خدمة العملاء والسياسات</h4>
+          <div class="form-group"><label>نص "من نحن؟":</label><textarea id="adminAbout" rows="3"></textarea></div>
+          <div class="form-group"><label>نص "لماذا ستورا ستور؟":</label><textarea id="adminWhy" rows="3"></textarea></div>
+          <div class="form-group"><label>نص "الشروط والأحكام":</label><textarea id="adminTerms" rows="3"></textarea></div>
+          <div class="form-group"><label>نص "سياسة الشحن":</label><textarea id="adminShipping" rows="3"></textarea></div>
+          <div class="form-group"><label>نص "سياسة الاستبدال والاسترجاع":</label><textarea id="adminReturn" rows="3"></textarea></div>
+          <button class="admin-submit-btn" onclick="savePoliciesSettings()">💾 حفظ السياسات والنصوص</button>
         </div>
 
-        <!-- Tab 2: الشريط الإعلاني الأحمر -->
+        <!-- Tab 2: الشريط الإعلاني الأحمر (قسم منفصل تماماً) -->
         <div class="admin-tab-content-area">
           <h4 style="font-size:0.95rem; font-weight:900; margin-bottom:10px;">📢 إدارة الشريط الإعلاني الأحمر المتحرك</h4>
           <div class="form-group" style="background:#fef2f2; padding:12px; border-radius:8px; border:1px solid #fca5a5; margin-bottom:15px;">
@@ -163,11 +111,7 @@
               <input type="checkbox" id="showAnnouncement" checked style="width:18px; height:18px;"> عرض الشريط الأحمر على صفحة العملاء
             </label>
           </div>
-          <div class="dual-lang-box">
-            <h5>النص المتحرك (Announcement)</h5>
-            <div class="form-group"><label>العربية:</label><textarea id="adminAnnouncementAr" rows="2" required></textarea></div>
-            <div class="form-group"><label>English:</label><textarea id="adminAnnouncementEn" rows="2" required dir="ltr"></textarea></div>
-          </div>
+          <div class="form-group"><label>النص المتحرك في الشريط الأحمر:</label><textarea id="adminAnnouncement" rows="3" placeholder="اكتب التنويه أو الإعلان هنا..."></textarea></div>
           <button class="admin-submit-btn" onclick="saveAnnouncementSettings()" style="background:#dc2626;">💾 حفظ وتحديث الشريط الأحمر</button>
         </div>
 
@@ -201,29 +145,27 @@
           </div>
         </div>
 
-        <!-- Tab 4: الحساب -->
+        <!-- Tab 4: كلمة المرور -->
         <div class="admin-tab-content-area">
-          <h4 style="font-size:0.95rem; font-weight:900; margin-bottom:10px;">🔐 إدارة الحساب</h4>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">لوحة التحكم محمية بحسابات سحابية آمنة (Firebase Auth).</p>
+          <h4 style="font-size:0.95rem; font-weight:900; margin-bottom:10px;">🔐 إدارة كلمة مرور الأدمن</h4>
+          <div class="form-group" style="margin-bottom:8px;"><input type="password" id="oldPassInput" placeholder="كلمة المرور القديمة الحالية"></div>
+          <div class="form-group" style="margin-bottom:8px;"><input type="password" id="newPassInput" placeholder="كلمة المرور الجديدة"></div>
+          <div class="form-group" style="margin-bottom:8px;"><input type="password" id="confirmPassInput" placeholder="تأكيد كلمة المرور الجديدة"></div>
+          <button class="admin-submit-btn" onclick="updateAdminPassword()">💾 تحديث كلمة المرور</button>
         </div>
 
         <!-- Tab 5: إدارة المنتجات -->
         <div class="admin-tab-content-area">
           <h4 style="font-size: 0.95rem; font-weight: 900; margin-bottom: 10px;">➕ إضافة أو تعديل موديل جديد</h4>
-          <div class="form-group"><label>كود المنتج (ID):</label><input type="text" id="pId" placeholder="UN-01" required></div>
+          <div class="form-group"><label>كود المنتج (ID):</label><input type="text" id="pId" placeholder="UN-01"></div>
+          <div class="form-group"><label>اسم المنتج:</label><input type="text" id="pTitle" placeholder="وحدة حمام خشبية فاخرة..."></div>
           
-          <div class="dual-lang-box">
-            <h5>اسم المنتج (Product Title)</h5>
-            <div class="form-group"><label>العربية:</label><input type="text" id="pTitleAr" placeholder="وحدة حمام خشبية فاخرة" required></div>
-            <div class="form-group"><label>English:</label><input type="text" id="pTitleEn" placeholder="Luxury Wooden Vanity Unit" required dir="ltr"></div>
-          </div>
-
-          <div class="form-group"><label>شارة المنتج (Badge State):</label>
+          <div class="form-group"><label>شارة المنتج:</label>
             <select id="pBadge">
-              <option value="الأكثر مبيعا">الأكثر مبيعا (Best Seller)</option>
-              <option value="جديد">جديد (New)</option>
-              <option value="بدون">بدون (None)</option>
-              <option value="نفذ بالكامل">نفذ بالكامل (Sold Out)</option>
+              <option value="الأكثر مبيعا">الأكثر مبيعا</option>
+              <option value="جديد">جديد</option>
+              <option value="بدون">بدون</option>
+              <option value="نفذ بالكامل">نفذ بالكامل</option>
             </select>
           </div>
 
@@ -258,18 +200,14 @@
 
           <div class="form-group" id="singlePriceWrapper" style="display:none;"><label>السعر الأساسي (ج.م):</label><input type="number" id="pSinglePrice" placeholder="1500"></div>
 
-          <div class="form-group"><label>الصورة الرئيسية للمنتج:</label><input type="text" id="pImage" placeholder="رابط الصورة الأساسية" required></div>
+          <div class="form-group"><label>الصورة الرئيسية للمنتج:</label><input type="text" id="pImage" placeholder="رابط الصورة الأساسية"></div>
           <div class="form-group"><label>الصور الفرعية (مفصولة بفاصلة ,):</label><input type="text" id="pSubImages" placeholder="https://..., https://..."></div>
           <div class="form-group"><label>نسبة الخصم الفردية للمنتج (%):</label><input type="number" id="pDiscount" placeholder="0"></div>
+          <div class="form-group"><label>المواصفات الفنية الخاصة:</label><textarea id="pSpecs" rows="3" placeholder="المقاس: ... الخامات: ..."></textarea></div>
           
-          <div class="dual-lang-box">
-            <h5>المواصفات الفنية الخاصة (Specifications)</h5>
-            <div class="form-group"><label>العربية:</label><textarea id="pSpecsAr" rows="3" required></textarea></div>
-            <div class="form-group"><label>English:</label><textarea id="pSpecsEn" rows="3" required dir="ltr"></textarea></div>
-          </div>
+          <button class="admin-submit-btn" onclick="saveProductToCloud()">💾 حفظ ونشر المنتج</button>
 
-          <button class="admin-submit-btn" onclick="saveProductToCloud()">💾 حفظ ونشر المنتج باللغتين</button>
-
+          <!-- قائمة المنتجات للحذف والتعديل -->
           <div style="margin-top:25px; border-top:2px solid var(--border); padding-top:15px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <h4 style="font-size:0.9rem; font-weight:900;">🗑 قائمة المنتجات (للتعديل أو الحذف)</h4>
@@ -295,6 +233,17 @@
   </div>
 
   <script>
+    (function checkAdminAccess() {
+      let currentStoredPass = localStorage.getItem("stora_admin_pass") || "admin123";
+      let entered = prompt("🔐 صفحة محمية - يرجى إدخال كلمة مرور لوحة التحكم:");
+      if (entered === currentStoredPass) {
+        document.body.style.display = "block";
+      } else {
+        alert("كلمة المرور غير صحيحة! سيتم توجيهك لصفحة المتجر.");
+        window.location.href = "index.html";
+      }
+    })();
+
     const firebaseConfig = {
       apiKey: "AIzaSyB7XZt7O1_7K8g6m8DoJe3XTUOTsSS6aQk",
       authDomain: "stora-store.firebaseapp.com",
@@ -306,37 +255,8 @@
     };
 
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-    const auth = firebase.auth();
     const db = firebase.firestore();
     let allProducts = [];
-
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        document.getElementById('authOverlay').style.display = 'none';
-        document.getElementById('loggedInUserEmail').innerText = `👤 ${user.email}`;
-      } else {
-        document.getElementById('authOverlay').style.display = 'flex';
-        document.getElementById('loggedInUserEmail').innerText = '';
-      }
-    });
-
-    function loginWithFirebase() {
-      const email = document.getElementById('authEmail').value.trim();
-      const pass = document.getElementById('authPassword').value.trim();
-      if (!email || !pass) {
-        alert("يرجى إدخال البريد الإلكتروني وكلمة المرور!");
-        return;
-      }
-      auth.signInWithEmailAndPassword(email, pass).catch((error) => {
-        alert("فشل تسجيل الدخول: تأكد من صحة البريد الإلكتروني أو كلمة المرور.");
-      });
-    }
-
-    function logoutFirebase() {
-      auth.signOut().then(() => {
-        alert("تم تسجيل الخروج بنجاح.");
-      });
-    }
 
     function switchAdminTab(index, btn) {
       document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
@@ -349,8 +269,7 @@
       if (doc.exists) {
         const data = doc.data();
         if (data.waNum) document.getElementById('adminWaNum').value = data.waNum;
-        if (data.announcementAr) document.getElementById('adminAnnouncementAr').value = data.announcementAr;
-        if (data.announcementEn) document.getElementById('adminAnnouncementEn').value = data.announcementEn;
+        if (data.announcement) document.getElementById('adminAnnouncement').value = data.announcement;
         if (document.getElementById('showAnnouncement')) document.getElementById('showAnnouncement').checked = data.showAnnouncement !== false;
         if (data.branch1) document.getElementById('adminBranch1').value = data.branch1;
         if (data.branch2) document.getElementById('adminBranch2').value = data.branch2;
@@ -363,17 +282,11 @@
         if (document.getElementById('showFb')) document.getElementById('showFb').checked = data.showFb !== false;
         if (document.getElementById('showEmail')) document.getElementById('showEmail').checked = data.showEmail !== false;
         if (document.getElementById('showTt')) document.getElementById('showTt').checked = data.showTt !== false;
-        
-        if (data.aboutAr) document.getElementById('adminAboutAr').value = data.aboutAr;
-        if (data.aboutEn) document.getElementById('adminAboutEn').value = data.aboutEn;
-        if (data.whyAr) document.getElementById('adminWhyAr').value = data.whyAr;
-        if (data.whyEn) document.getElementById('adminWhyEn').value = data.whyEn;
-        if (data.termsAr) document.getElementById('adminTermsAr').value = data.termsAr;
-        if (data.termsEn) document.getElementById('adminTermsEn').value = data.termsEn;
-        if (data.shippingAr) document.getElementById('adminShippingAr').value = data.shippingAr;
-        if (data.shippingEn) document.getElementById('adminShippingEn').value = data.shippingEn;
-        if (data.returnAr) document.getElementById('adminReturnAr').value = data.returnAr;
-        if (data.returnEn) document.getElementById('adminReturnEn').value = data.returnEn;
+        if (data.aboutText) document.getElementById('adminAbout').value = data.aboutText;
+        if (data.whyText) document.getElementById('adminWhy').value = data.whyText;
+        if (data.termsText) document.getElementById('adminTerms').value = data.termsText;
+        if (data.shippingText) document.getElementById('adminShipping').value = data.shippingText;
+        if (data.returnText) document.getElementById('adminReturn').value = data.returnText;
       }
     });
 
@@ -397,39 +310,22 @@
     }
 
     function savePoliciesSettings() {
-      const aboutAr = document.getElementById('adminAboutAr').value.trim();
-      const aboutEn = document.getElementById('adminAboutEn').value.trim();
-      const whyAr = document.getElementById('adminWhyAr').value.trim();
-      const whyEn = document.getElementById('adminWhyEn').value.trim();
-      const termsAr = document.getElementById('adminTermsAr').value.trim();
-      const termsEn = document.getElementById('adminTermsEn').value.trim();
-      const shippingAr = document.getElementById('adminShippingAr').value.trim();
-      const shippingEn = document.getElementById('adminShippingEn').value.trim();
-      const returnAr = document.getElementById('adminReturnAr').value.trim();
-      const returnEn = document.getElementById('adminReturnEn').value.trim();
-
-      if (!aboutAr || !aboutEn || !whyAr || !whyEn || !termsAr || !termsEn || !shippingAr || !shippingEn || !returnAr || !returnEn) {
-        alert("يرجى ملء جميع الحقول باللغتين العربية والإنجليزية بشكل إلزامي!");
-        return;
-      }
+      const aboutText = document.getElementById('adminAbout').value.trim();
+      const whyText = document.getElementById('adminWhy').value.trim();
+      const termsText = document.getElementById('adminTerms').value.trim();
+      const shippingText = document.getElementById('adminShipping').value.trim();
+      const returnText = document.getElementById('adminReturn').value.trim();
 
       db.collection("stora_store_settings").doc("general").set({
-        aboutAr, aboutEn, whyAr, whyEn, termsAr, termsEn, shippingAr, shippingEn, returnAr, returnEn
-      }, { merge: true }).then(() => alert("تم حفظ السياسات والنصوص باللغتين بنجاح!")).catch(err => alert("خطأ: " + err.message));
+        aboutText, whyText, termsText, shippingText, returnText
+      }, { merge: true }).then(() => alert("تم حفظ السياسات والنصوص بنجاح!")).catch(err => alert("خطأ: " + err.message));
     }
 
     function saveAnnouncementSettings() {
-      const announcementAr = document.getElementById('adminAnnouncementAr').value.trim();
-      const announcementEn = document.getElementById('adminAnnouncementEn').value.trim();
+      const announcement = document.getElementById('adminAnnouncement').value.trim();
       const showAnnouncement = document.getElementById('showAnnouncement').checked;
-
-      if (!announcementAr || !announcementEn) {
-        alert("يرجى ملء نص الإعلان بالعربية والإنجليزية بشكل إلزامي!");
-        return;
-      }
-
       db.collection("stora_store_settings").doc("general").set({
-        announcementAr, announcementEn, announcement: announcementAr, showAnnouncement
+        announcement, showAnnouncement
       }, { merge: true }).then(() => alert("تم تحديث وحفظ إعدادات الشريط الإعلاني بنجاح!")).catch(err => alert("خطأ: " + err.message));
     }
 
@@ -467,11 +363,9 @@
       }
 
       filtered.forEach(p => {
-        let displayTitle = p.titleAr || p.title || 'بدون اسم';
-        let badgeText = p.badge ? `(${p.badge})` : '';
         listContainer.innerHTML += `
           <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:8px 12px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem;">
-            <div><b>[${p.category}]</b> [${p.id}] ${displayTitle} <span style="color:#c59b27; font-weight:700;">${badgeText}</span></div>
+            <div><b>[${p.category}]</b> [${p.id}] ${p.title}</div>
             <div style="display:flex; gap:6px;">
               <button onclick='loadProductForEdit("${p.id}")' style="background:#3b82f6; color:#fff; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:800; font-size:0.75rem;">تعديل</button>
               <button onclick="deleteProduct('${p.id}')" style="background:#ef4444; color:#fff; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:800; font-size:0.75rem;">حذف</button>
@@ -483,20 +377,15 @@
 
     function saveProductToCloud() {
       const id = document.getElementById('pId').value.trim();
-      const titleAr = document.getElementById('pTitleAr').value.trim();
-      const titleEn = document.getElementById('pTitleEn').value.trim();
+      const title = document.getElementById('pTitle').value.trim();
       const badge = document.getElementById('pBadge').value;
       const category = document.getElementById('pCategory').value;
       const image = document.getElementById('pImage').value.trim();
       const subImages = document.getElementById('pSubImages').value.trim();
       const discount = parseFloat(document.getElementById('pDiscount').value) || 0;
-      const specsAr = document.getElementById('pSpecsAr').value.trim();
-      const specsEn = document.getElementById('pSpecsEn').value.trim();
+      const specs = document.getElementById('pSpecs').value.trim();
 
-      if (!id || !titleAr || !titleEn || !image || !specsAr || !specsEn) {
-        alert("يرجى تعبئة جميع الحقول النصية الأساسية (الاسم، المواصفات، الصورة، الكود) باللغتين العربية والإنجليزية بشكل إلزامي!");
-        return;
-      }
+      if (!id || !title) { alert("يرجى ملء الكود واسم المنتج على الأقل"); return; }
 
       let sizes = [];
       let basePrice = 0;
@@ -523,24 +412,12 @@
       }
 
       db.collection("stora_store_products").doc(id).set({
-        id: id, 
-        titleAr: titleAr, 
-        titleEn: titleEn, 
-        title: titleAr,
-        badge: badge, 
-        category: category, 
-        price: basePrice,
-        image: image || sizes[0].image, 
-        subImages: subImages, 
-        discount: discount,
-        specsAr: specsAr, 
-        specsEn: specsEn, 
-        specs: specsAr,
-        sizes: sizes, 
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        id: id, title: title, badge: badge, category: category, price: basePrice,
+        image: image || sizes[0].image, subImages: subImages, discount: discount,
+        specs: specs, sizes: sizes, createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
-        alert("تم حفظ ونشر الموديل في السحابة باللغتين وحفظ شارة الحالة بنجاح!");
-      }).catch(err => { alert("خطأ في الصلاحيات أو الحفظ: " + err.message); });
+        alert("تم حفظ ونشر الموديل في السحابة بنجاح!");
+      }).catch(err => { alert("خطأ في الحفظ: " + err.message); });
     }
 
     function loadProductForEdit(id) {
@@ -548,8 +425,7 @@
       if (!p) return;
 
       document.getElementById('pId').value = p.id;
-      document.getElementById('pTitleAr').value = p.titleAr || p.title || '';
-      document.getElementById('pTitleEn').value = p.titleEn || '';
+      document.getElementById('pTitle').value = p.title;
       document.getElementById('pBadge').value = p.badge || 'بدون';
       document.getElementById('pCategory').value = p.category || 'وحدات حمام';
       toggleSizeFields();
@@ -557,8 +433,7 @@
       document.getElementById('pImage').value = p.image || '';
       document.getElementById('pSubImages').value = p.subImages || '';
       document.getElementById('pDiscount').value = p.discount || 0;
-      document.getElementById('pSpecsAr').value = p.specsAr || p.specs || '';
-      document.getElementById('pSpecsEn').value = p.specsEn || '';
+      document.getElementById('pSpecs').value = p.specs || '';
 
       if (p.category === 'وحدات حمام' && p.sizes) {
         p.sizes.forEach(s => {
@@ -601,11 +476,28 @@
       batch.commit().then(() => { alert(`تم تطبيق العملية بنجاح على ${count} منتج!`); }).catch(err => { alert("خطأ: " + err.message); });
     }
 
+    function updateAdminPassword() {
+      let currentStoredPass = localStorage.getItem("stora_admin_pass") || "admin123";
+      let oldInput = document.getElementById('oldPassInput').value.trim();
+      let newInput = document.getElementById('newPassInput').value.trim();
+      let confirmInput = document.getElementById('confirmPassInput').value.trim();
+
+      if (oldInput !== currentStoredPass) { alert("كلمة المرور القديمة غير صحيحة!"); return; }
+      if (!newInput || newInput.length < 4) { alert("يرجى إدخال كلمة مرور جديدة قوية (4 أحرف/أرقام على الأقل)"); return; }
+      if (newInput !== confirmInput) { alert("كلمة المرور الجديدة وتأكيدها غير متطابقين!"); return; }
+
+      localStorage.setItem("stora_admin_pass", newInput);
+      alert("تم تحديث وتغيير كلمة مرور الأدمن بنجاح!");
+      document.getElementById('oldPassInput').value = "";
+      document.getElementById('newPassInput').value = "";
+      document.getElementById('confirmPassInput').value = "";
+    }
+
     function deleteProduct(id) {
       if (confirm(`هل أنت متأكد من حذف المنتج ${id} من السحابة؟`)) {
         db.collection("stora_store_products").doc(id).delete().then(() => {
           alert("تم الحذف بنجاح!");
-        }).catch(err => err.message && alert("خطأ في الحذف: " + err.message));
+        }).catch(err => alert("خطأ في الحذف: " + err.message));
       }
     }
   </script>
